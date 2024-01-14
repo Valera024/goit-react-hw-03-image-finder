@@ -7,7 +7,7 @@ class Modal extends Component {
         return (
             <div id="modal" className={styles.overlay} >
                 <div className={styles.modal}>
-                    <img src={selectImage.image} />
+                    <img src={selectImage.image} alt="big img"/>
                 </div>
             </div>
         )
