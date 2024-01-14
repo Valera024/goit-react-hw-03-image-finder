@@ -23,3 +23,9 @@
 .button:focus {
   background-color: #303f9f;
 }
+
+.container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}

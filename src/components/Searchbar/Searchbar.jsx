@@ -10,7 +10,7 @@ class Searchbar extends Component {
                     <button type="submit" className={styles.button}>
                         <span className={styles.buttonLabel}>🔍</span>    
                     </button>
-                    <input className={styles.input} type="text" autoComplete="off" autoFocus placeholder="Search images and photos"/>
+                    <input className={styles.input} name="searchbar" type="text" autoComplete="off" autoFocus placeholder="Search images and photos"/>
                 </form>
             </header>
         )
