@@ -4,6 +4,7 @@ import Searchbar from "./Searchbar/Searchbar";
 import ImageGallery from "./ImageGallery/ImageGallery";
 import Button from "./Button/Button";
 import Modal from "./Modal/Modal";
+import Loader from "./Loader/Loader";
 
 class App extends Component {
   state = {
@@ -11,27 +12,43 @@ class App extends Component {
     page: 1,
     perPage: 12,
     filter: '',
-    selectImage: null
+    selectImage: null,
+    isModalOpen: false,
+    loading: false
   }
 
-  handleSubmit = (event) => {
+  handleSubmit = async (event) => {
     event.preventDefault()
     const filterValue = document.querySelector("input[name='searchbar']").value;
-    this.setState(({ page: 1, images: [], filter: filterValue }),
-      this.fetchData.bind(this)
-    )
-  }
+     this.setState({
+      page: 1,
+      images: [],
+      filter: filterValue,
+      loading: true, 
+    }, async () => {
+    try {
+      await this.fetchData();
+    } finally {
+      this.setState({ loading: false });
+    }
+  });
+};
 
   onClickLargeImg = (event) => {
     if (event.target.closest("img")) {
       const largeImage = event.target.dataset.largeImage
-      this.setState({ selectImage: largeImage }, () => {
-        console.log(this.state)
-        const modal = document.querySelector("#modal")
-        modal.style.display = "block"
-      })
+      this.openModal(largeImage)
     }
   }
+
+  openModal = (largeImage) => {
+  this.setState({ selectImage: largeImage, isModalOpen: true });
+}
+
+closeModal = () => {
+  this.setState({ selectImage: null, isModalOpen: false });
+}
+
 
   onClickMore = () => {
     this.setState(
@@ -45,28 +62,32 @@ class App extends Component {
   async fetchData() {
     try {
       const response = await fetchSearch(this.state.page, this.state.perPage, this.state.filter);
-       this.setState((prevState) => {
-      if (prevState.images.length > 0) {
-        return {
-          images: [...prevState.images, ...response.data.hits],
-        };
-      } else {
-        return { images: response.data.hits };
-      }
-    });
+      this.setState((prevState) => {
+        if (prevState.images.length > 0) {
+          return {
+            images: [...prevState.images, ...response.data.hits],
+          };
+        } else {
+          return { images: response.data.hits };
+        }
+      });
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   }
 
   render() {
+    const { images, loading } = this.state;
     const btn = this.state.images.length > 0 ? <Button onClick={this.onClickMore} /> : "";
     return (
       <>
         <Searchbar onSubmit={this.handleSubmit} />
-        <ImageGallery images={this.state.images} onClick={ this.onClickLargeImg} />
+        {loading && <Loader visible={true} />} 
+        <ImageGallery images={images} onClick={this.onClickLargeImg} />
         {btn}
-        <Modal image={ this.state.selectImage} />
+        {this.state.isModalOpen && (
+          <Modal image={this.state.selectImage} onClose={this.closeModal} />
+        )}
       </>
     );
   }
